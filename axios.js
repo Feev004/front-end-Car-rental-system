@@ -28,21 +28,6 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-//Menu********************************************************************************
-// Your Express.js route handler งั้น ตั้งชื่อไฟล์เป็น index.els แล้ค่อย link to login    ไฟล์ที่จะให้ขึ้นก่อน login  อ่ะ  เปลี่ยนละ
-//app.get("/", async (req, res) => {
-//  try {
-//      const response = await axios.get(url + "/showcar");
-//     res.render("showcar.ejs", {
-//        menu: "รืก.ejs", // Render the menu
-//        showcar: response.data
-//    });
-// } catch (error) {
-//     console.error("Error fetching showcar data:", error);
-//    res.status(500).send("An error occurred while fetching showcar data");
-// }
-//});
-
 //var********************************************************************************************
 let userlogin = false;
 
@@ -71,6 +56,7 @@ app.get("/", async (req, res) => {
 });
 
 // login********************************************************************************************
+// login
 app.post("/login", async (req, res) => {
   try {
     const data = {
@@ -82,15 +68,9 @@ app.post("/login", async (req, res) => {
     const response = await axios.post(url + "/login", data);
     if (response.data.massage == true) {
       if (data.password === response.data.checkuser.password) {
-        if (response.data.checkuser.typeid == "admin") {
-          userlogin = true;
-          req.session.userid_ = response.data.userid;
-          res.redirect("/admincar");
-        } else {
-          userlogin = true;
-          req.session.userid_ = response.data.userid;
-          res.redirect("/showcar");
-        }
+        userlogin = true;
+        req.session.userid_ = response.data.userid;
+        res.redirect("/showcar");
       } else {
         res.redirect("/");
       }
@@ -101,6 +81,7 @@ app.post("/login", async (req, res) => {
     res.status(500).redirect("/");
   }
 });
+
 
 // logout********************************************************************************************
 app.get("/logout", (req, res) => {
@@ -155,7 +136,6 @@ app.post("/createcar", upload.single("Image"), async (req, res) => {
 app.get("/showcar", async (req, res) => {
   try {
     const response = await axios.get(url + "/showcar");
-    // เช็ค session และ userlogin
     if (req.session.userdata || userlogin == true) {
       res.render("showcar.ejs", {
         showcar: response.data,
@@ -165,6 +145,15 @@ app.get("/showcar", async (req, res) => {
     }
   } catch {
     res.status(500).send("error");
+  }
+});
+
+app.get("/detailrent/:carid", async (req, res) => {
+  try {
+    const response = await axios.get(url + "/detailrent/" + req.params.carid);
+    res.render("detailrent.ejs", { data: response.data });
+  } catch {
+    res.status(500).redirect("/showcar");
   }
 });
 
@@ -220,10 +209,6 @@ app.get("/rental/:id", async (req, res) => {
 });
 
 app.post("/rental", async (req, res) => {
-  // const data = {
-  //     timein:req.body.checkindate,
-  //     timeout:req.body.checkoutdate
-  // }
   console.log(req.body.carid);
   await axios.post(url + "/rental", req.body);
   res.redirect("/rental/" + req.body.carid);
@@ -239,9 +224,8 @@ app.get("/receipt/:id", async (req, res) => {
     let time1 = new Date(response.data.checkindate);
     let time2 = new Date(response.data.checkoutdate);
     let sumtime = new Date(time1 - time2);
-    let price =
-      sumtime.getDay() * parseInt(responsepriceperday.data.priceperday);
-    console.log(price);
+    let price = sumtime.getDay() * parseInt(responsepriceperday.data.priceperday);
+    await axios.put(url + "/inserttotalrental/" + req.params.id , {price:price});
     res.render("receipt.ejs", { price: price });
   } catch {
     res.status(500).send("error receipt id");
@@ -251,31 +235,6 @@ app.post("/receipt/:id", async (req, res) => {
   try {
   } catch {
     res.status(500).send("error");
-  }
-});
-
-app.get("/admincar", async (req, res) => {
-  try {
-    const response = await axios.get(url + "/showcar");
-    // เช็ค session และ userlogin
-    if (req.session.userdata || userlogin == true) {
-      res.render("showcar.ejs", {
-        showcar: response.data,
-      });
-    } else {
-      res.render("login.ejs");
-    }
-  } catch {
-    res.status(500).send("error");
-  }
-});
-
-app.get("/detailrent/:carid", async (req, res) => {
-  try {
-    const response = await axios.get(url + "/detailrent/" + req.params.carid);
-    res.render("detailrent.ejs", { data: response.data });
-  } catch {
-    res.status(500).redirect("/showcar");
   }
 });
 

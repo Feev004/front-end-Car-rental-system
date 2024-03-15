@@ -112,10 +112,15 @@
     </div>
 
     <center>
-      <h1>CAR RENTAL SYSTEM</h1>
+      <h1>ระบบการเช่ารถ</h1>
       <table>
         <tr>
           <th colspan="2">ข้อมูลรถ</th>
+        </tr>
+        <tr>
+          <td>ผู้ใช้งาน</td>
+          <%= datacar.brand %>
+          <td><%= datauser.username %></td>
         </tr>
         <tr>
           <td>รูปภาพ</td>
@@ -130,7 +135,7 @@
           <td><%= datacar.insurance_charge %></td>
         </tr>
       </table>
-      <p><%= datauser.username %></p>
+      
       <form action="/rental" method="post">
         <input
           hidden
@@ -157,12 +162,13 @@
           </tr>
         </table>
         <br />
+        <th>ต้องกดยืนยันก่อน จึงจะสามารถกดชำระเงินได้<br></th>
         <input type="submit" value="ยืนยัน" class="btn" />
       </form>
       <br />
       <br />
 
-      <a href="/receipt/<%= datarental.rentalid %>">
+      <a href="/receipt/<%= datauser.userid %>">
         <input type="button" value="ชำระเงิน" class="btn"
       /></a>
       <a href="/showcar">
